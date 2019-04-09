@@ -1,0 +1,114 @@
+.results-container {
+
+}
+
+.results-header {
+
+}
+
+.results-quantity {
+
+}
+
+.results-homes {
+    display: flex;
+    flex-wrap: wrap;
+    color: #fff;
+    font-family: "Open Sans",Gotham,gotham,Tahoma,Geneva,sans-serif;
+    text-shadow: 0 0 3px rgba(0,0,0,.5);
+}
+
+.results-buttons {
+
+}
+
+.results-for-you {
+
+}
+
+.results-newest {
+
+}
+
+.results-cheapest {
+
+}
+
+.results-more {
+
+}
+
+.results-homes {
+
+}
+
+.results-home-heart {
+    display: flex;
+    margin-left: 150px;
+    width: 35px;
+    height: 30px;
+}
+
+.results-home-slide {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    margin-left: 2px;
+    margin-right: 2px;
+}
+
+.results-home-slide:hover {
+    cursor: pointer;
+}
+
+.results-home-days {
+    display: flex;
+    margin: 10px 5px 60px 10px;
+    font-size: 14px;
+}
+
+.results-home-line2 {
+    display: flex;
+}
+
+.results-home-listing-dot {
+    border: 2px solid white;
+    height: 9px;
+    width: 9px;
+    background-color: red;
+    border-radius: 50%;
+    display: inline-block;
+    margin-left: 10px;
+    margin-top: 2px;
+}
+
+.results-home-listing-type {
+    display: flex;
+    margin-left: 5px;
+    font-size: 14px;
+}
+
+.results-home-line3 {
+    display: flex;
+}
+
+.results-home-price {
+    display: flex;
+    margin-left: 10px;
+    font-size: 28px;
+}
+
+.results-home-details {
+    display: flex;
+    margin-left: 10px;
+    margin-top: 12px;
+    font-size: 16px;
+}
+
+.results-home-address {
+    display: flex;
+    margin-left: 10px;
+    font-size: 14px;
+    margin-bottom: 5px;
+    color: #e1e2e1;
+}
