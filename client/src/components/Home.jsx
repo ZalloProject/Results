@@ -28,7 +28,7 @@ const Home = ({ details }) => {
           }{" "}
           on Zallo
         </span>
-        <span>
+        <span className={style["results-save-home-span"]}>
           <img
             className={style["results-home-heart"]}
             src="https://s3-us-west-1.amazonaws.com/zallosimilarhomes/ZalloHeart.png"

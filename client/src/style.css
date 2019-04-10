@@ -109,9 +109,13 @@ li.active {
     font-family: "Open Sans",Gotham,gotham,Tahoma,Geneva,sans-serif;
 }
 
+.results-save-home-span {
+    margin: auto;
+    margin-right: 0px;
+}
+
 .results-home-heart {
     display: flex;
-    margin-left: 150px;
     width: 35px;
     height: 30px;
 }
