@@ -133,7 +133,6 @@ class App extends React.Component {
   }
 
   houseSelect() {
-    console.log('clicked');
     window.dispatchEvent(
       new CustomEvent(("house_view", { detail: { houseView: true } }))
     );
