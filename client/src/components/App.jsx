@@ -1,3 +1,6 @@
+/* eslint-disable class-methods-use-this */
+/* eslint-disable jsx-a11y/click-events-have-key-events */
+/* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable react/no-access-state-in-setstate */
 /* eslint-disable react/destructuring-assignment */
 /* eslint-disable import/extensions */
@@ -12,6 +15,7 @@ class App extends React.Component {
     super(props);
     this.state = {
       homes: this.props.homes,
+      filteredList: this.props.homes,
       currentPage: 1,
       activeFilter: "Homes for you",
       thirdFilter: "Cheapest",
@@ -24,24 +28,100 @@ class App extends React.Component {
         "Square Feet",
         "Year Built",
         "Lot Size",
-        "Zalloximation (High to Low)",
-        "Zalloximation (Low to High)"
+        "Zapproximation (High to Low)",
+        "Zapproximation (Low to High)"
       ]
     };
-    this.filterSelect = this.filterSelect.bind(this);
+    this.sortHomes = this.sortHomes.bind(this);
     this.moreFiltersDD = this.moreFiltersDD.bind(this);
+    this.pageSelect = this.pageSelect.bind(this);
+    this.houseSelect = this.houseSelect.bind(this);
   }
 
-  filterSelect(e) {
+  componentWillMount() {
+    window.addEventListener("price_change", e => this.filteredHomes(e));
+    window.addEventListener("beds_change", e => this.filteredHomes(e));
+    window.addEventListener("options", e => this.filteredHomes(e));
+  }
+
+  filteredHomes(e) {
+    let newList = [];
+
+    switch (e.type) {
+      case "price_change":
+        newList = this.state.filteredList.filter(
+          home => home.price >= e.detail.low && home.price <= e.detail.high
+        );
+        break;
+      case "beds_change":
+        newList = this.state.filteredList.filter(
+          home => home.beds >= e.detail.beds
+        );
+        break;
+      case "options":
+        newList = this.state.filteredList.filter(home =>
+          e.detail.options.includes(home.homeType)
+        );
+        break;
+      default:
+        newList = this.state.filteredList;
+    }
+
+    this.setState({
+      filteredList: newList,
+      currentPage: 1,
+      activeFilter: "Homes for you",
+      moreFilterActive: false
+    });
+  }
+
+  sortHomes(e) {
+    let sorted = [];
+
     let newFilter = this.state.thirdFilter;
     if (this.state.filterOptions.includes(e.target.textContent)) {
       newFilter = e.target.textContent;
     }
 
+    switch (e.target.textContent) {
+      case "Newest":
+        sorted = this.state.filteredList.sort(
+          (a, b) =>
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        );
+        break;
+      case "Zapproximation (Low to High)":
+      case "Cheapest":
+        sorted = this.state.filteredList.sort((a, b) => a.price - b.price);
+        break;
+      case "Zapproximation (High to Low)":
+      case "Price (High to Low)":
+        sorted = this.state.filteredList.sort((a, b) => b.price - a.price);
+        break;
+      case "Bedrooms":
+        sorted = this.state.filteredList.sort((a, b) => b.beds - a.beds);
+        break;
+      case "Bathrooms":
+        sorted = this.state.filteredList.sort((a, b) => b.baths - a.baths);
+        break;
+      case "Square Feet":
+      case "Largest Homes":
+        sorted = this.state.filteredList.sort((a, b) => b.size - a.size);
+        break;
+      case "Homes for you":
+      case "Largest Lots":
+      case "Lot Size":
+      case "Year Built":
+      case "Popular Homes":
+      default:
+        sorted = this.state.filteredList;
+    }
     this.setState({
+      filteredList: sorted,
       activeFilter: e.target.textContent,
       moreFilterActive: false,
-      thirdFilter: newFilter
+      thirdFilter: newFilter,
+      currentPage: 1
     });
   }
 
@@ -52,17 +132,45 @@ class App extends React.Component {
     });
   }
 
+  houseSelect() {
+    console.log('clicked');
+    window.dispatchEvent(
+      new CustomEvent(("house_view", { detail: { houseView: true } }))
+    );
+  }
+
+  pageSelect(e) {
+    let page = e.target.textContent;
+    if (
+      page === "Next" &&
+      this.state.currentPage <= Math.floor(this.state.homes.length / 25)
+    ) {
+      page = this.state.currentPage + 1;
+    } else if (page === "Next") {
+      page = this.state.currentPage;
+    }
+    this.setState({
+      currentPage: Number(page)
+    });
+  }
+
   render() {
-    const { homes } = this.state;
+    const { filteredList } = this.state;
     const display = [];
-    const totalPages = homes.length / 25;
+    const totalPages = filteredList.length / 25;
     const pages = [];
 
-    for (let i = 0; i < homes.length; i++) {
-      if (i === 25) {
+    for (
+      let i = 0 + (this.state.currentPage - 1) * 25;
+      i < filteredList.length;
+      i++
+    ) {
+      if (i === (this.state.currentPage - 1) * 25 + 25) {
         break;
       }
-      display.push(<Home details={homes[i]} />);
+      display.push(
+        <Home details={filteredList[i]} select={this.houseSelect} />
+      );
     }
 
     for (let i = 0; i < totalPages; i++) {
@@ -75,28 +183,36 @@ class App extends React.Component {
             ]
           : [style["results-page-number"], `results-page-${i + 1}`];
 
-      pages.push(<div className={classes.join(" ")}>{i + 1}</div>);
+      pages.push(
+        <div className={classes.join(" ")} onClick={this.pageSelect}>
+          {i + 1}
+        </div>
+      );
     }
-    pages.push(<div className={style["results-page-next"]}>Next</div>);
+    pages.push(
+      <div className={style["results-page-next"]} onClick={this.pageSelect}>
+        Next
+      </div>
+    );
 
     const filters = [
       <Filter
         filterClass="for-you"
         filterName="Homes for you"
         selected={this.state.activeFilter === "Homes for you"}
-        clicked={this.filterSelect}
+        clicked={this.sortHomes}
       />,
       <Filter
         filterClass="newest"
         filterName="Newest"
         selected={this.state.activeFilter === "Newest"}
-        clicked={this.filterSelect}
+        clicked={this.sortHomes}
       />,
       <Filter
         filterClass="third-filter"
         filterName={this.state.thirdFilter}
         selected={this.state.activeFilter === this.state.thirdFilter}
-        clicked={this.filterSelect}
+        clicked={this.sortHomes}
       />,
       <Filter
         filterClass="more"
@@ -106,6 +222,37 @@ class App extends React.Component {
       />
     ];
 
+    const bottomFilters = [];
+    let filterText;
+    for (let i = 0; i < 3; i++) {
+      switch (i) {
+        case 0:
+          filterText = "Largest Homes";
+          break;
+        case 1:
+          filterText = "Popular Homes";
+          break;
+        case 2:
+          filterText = "Largest Lots";
+          break;
+        default:
+      }
+
+      bottomFilters.push(
+        <div className={style["results-bottom-filters"]}>
+          <img
+            className={style["filter-images"]}
+            src={`https://s3-us-west-1.amazonaws.com/zallosimilarhomes/0${25 *
+              (i + 1)}.jpg`}
+            alt=""
+          />
+          <div className={style["filter-text"]} onClick={this.sortHomes}>
+            {filterText}
+          </div>
+        </div>
+      );
+    }
+
     return (
       <div className={style["results-container"]}>
         <div className={style["results-title-container"]}>
@@ -113,7 +260,7 @@ class App extends React.Component {
             Phoenix Metro Area Real Estate
           </h1>
           <span className={style["results-quantity"]}>
-            {homes.length} homes for sale.
+            {filteredList.length} homes for sale.
           </span>
         </div>
         <div className={style["results-buttons-row"]}>
@@ -122,47 +269,12 @@ class App extends React.Component {
             active={this.state.moreFilterActive}
             options={this.state.filterOptions}
             displayedFilter={this.state.thirdFilter}
-            click={this.filterSelect}
+            click={this.sortHomes}
           />
         </div>
         <div className={style["results-homes"]}>{display}</div>
         <div className={style["results-bottom-filter-bar"]}>
-          <div
-            className={[style["results-bottom-filters"], style.filter1].join(
-              " "
-            )}
-          >
-            <img
-              className={style["filter-images"]}
-              src="https://s3-us-west-1.amazonaws.com/zallosimilarhomes/025.jpg"
-              alt=""
-            />
-            <div className={style["filter-text"]}>Largest homes</div>
-          </div>
-          <div
-            className={[style["results-bottom-filters"], style.filter2].join(
-              " "
-            )}
-          >
-            <img
-              className={style["filter-images"]}
-              src="https://s3-us-west-1.amazonaws.com/zallosimilarhomes/050.jpg"
-              alt=""
-            />
-            <div className={style["filter-text"]}>Popular homes</div>
-          </div>
-          <div
-            className={[style["results-bottom-filters"], style.filter3].join(
-              " "
-            )}
-          >
-            <img
-              className={style["filter-images"]}
-              src="https://s3-us-west-1.amazonaws.com/zallosimilarhomes/075.jpg"
-              alt=""
-            />
-            <div className={style["filter-text"]}>Largest lots</div>
-          </div>
+          {bottomFilters}
         </div>
         <div className={style["results-page-bar"]}>{pages}</div>
       </div>

@@ -1,8 +1,10 @@
+/* eslint-disable jsx-a11y/no-static-element-interactions */
+/* eslint-disable jsx-a11y/click-events-have-key-events */
 import React from "react";
 import moment from "moment";
 import style from "../style.css";
 
-const Home = ({ details }) => {
+const Home = ({ details, select }) => {
   const styles = {
     backgroundImage: `url(${details.pictureURL})`,
     width: "312px",
@@ -64,6 +66,7 @@ const Home = ({ details }) => {
         {", "}
         {details.state} {details.zip}
       </span>
+      <div className={style["results-home-cover"]} onClick={select} />
     </div>
   );
 };
