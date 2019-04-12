@@ -5,6 +5,7 @@
 /* eslint-disable react/destructuring-assignment */
 /* eslint-disable import/extensions */
 import React from "react";
+import update from "react-addons-update";
 import style from "../style.css";
 import Home from "./Home.jsx";
 import Filter from "./Filter.jsx";
@@ -36,6 +37,7 @@ class App extends React.Component {
     this.moreFiltersDD = this.moreFiltersDD.bind(this);
     this.pageSelect = this.pageSelect.bind(this);
     this.houseSelect = this.houseSelect.bind(this);
+    this.saveHome = this.saveHome.bind(this);
   }
 
   componentWillMount() {
@@ -139,6 +141,33 @@ class App extends React.Component {
     );
   }
 
+  saveHome(id) {
+    let index;
+    this.state.homes.forEach((home, i) => {
+      if (home._id === id) {
+        index = i;
+      }
+    });
+
+    let filterIndex;
+    this.state.fil.forEach((home, i) => {
+      if (home._id === id) {
+        filterIndex = i;
+      }
+    });
+
+    this.setState({
+      homes: update(this.state.homes, {
+        [index]: { saved: { $set: !this.state.homes[index].saved } }
+      }),
+      filteredList: update(this.state.filteredList, {
+        [filterIndex]: {
+          saved: { $set: !this.state.filteredList[filterIndex].saved }
+        }
+      })
+    });
+  }
+
   pageSelect(e) {
     let page = e.target.textContent;
     if (
@@ -169,7 +198,12 @@ class App extends React.Component {
         break;
       }
       display.push(
-        <Home details={filteredList[i]} select={this.houseSelect} key={i} />
+        <Home
+          details={filteredList[i]}
+          select={this.houseSelect}
+          key={i}
+          save={this.saveHome}
+        />
       );
     }
 

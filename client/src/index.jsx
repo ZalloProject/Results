@@ -11,6 +11,7 @@ fetch("/homes", {
 })
   .then(response => response.json())
   .then(myJson => {
+    myJson.forEach(home => Object.assign(home, { saved: false }));
     ReactDOM.render(<App homes={myJson} />, document.getElementById("results"));
   })
   .catch(err => console.log(err));

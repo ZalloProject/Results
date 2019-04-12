@@ -1,10 +1,11 @@
+/* eslint-disable jsx-a11y/no-noninteractive-element-interactions */
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 import React from "react";
 import moment from "moment";
 import style from "../style.css";
 
-const Home = ({ details, select }) => {
+const Home = ({ details, select, save }) => {
   const styles = {
     backgroundImage: `url(${details.pictureURL})`,
     width: "312px",
@@ -18,6 +19,10 @@ const Home = ({ details, select }) => {
     style: "currency",
     currency: "USD"
   });
+
+  const imgSrc = details.saved
+    ? "https://s3-us-west-1.amazonaws.com/zallosimilarhomes/ZalloHeartSaved.png"
+    : "https://s3-us-west-1.amazonaws.com/zallosimilarhomes/ZalloHeart.png";
 
   return (
     <div className={style["results-home-slide"]} style={styles}>
@@ -33,8 +38,9 @@ const Home = ({ details, select }) => {
         <span className={style["results-save-home-span"]}>
           <img
             className={style["results-home-heart"]}
-            src="https://s3-us-west-1.amazonaws.com/zallosimilarhomes/ZalloHeart.png"
+            src={imgSrc}
             alt="Similar Home"
+            onClick={save.bind(null, details._id)}
           />
         </span>
       </span>

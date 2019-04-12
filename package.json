@@ -25,6 +25,7 @@
     "moment": "^2.24.0",
     "mongoose": "^5.5.0",
     "react": "^16.8.6",
+    "react-addons-update": "^15.6.2",
     "react-dom": "^16.8.6"
   },
   "devDependencies": {
@@ -67,10 +68,11 @@
       "<rootDir>/client/test/jest.config.js"
     ],
     "moduleNameMapper": {
-      "\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$":
-        "<rootDir>/__mocks__/fileMock.js",
+      "\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$": "<rootDir>/__mocks__/fileMock.js",
       "\\.(css|less)$": "identity-obj-proxy"
     },
-    "setupFilesAfterEnv": ["<rootDir>setupTests.js"]
+    "setupFilesAfterEnv": [
+      "<rootDir>setupTests.js"
+    ]
   }
 }
