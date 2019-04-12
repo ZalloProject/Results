@@ -42,6 +42,9 @@ class App extends React.Component {
     window.addEventListener("price_change", e => this.filteredHomes(e));
     window.addEventListener("beds_change", e => this.filteredHomes(e));
     window.addEventListener("options", e => this.filteredHomes(e));
+    window.addEventListener("houses", e =>
+      this.setState({ homes: e.detail.houses })
+    );
   }
 
   filteredHomes(e) {
@@ -49,22 +52,20 @@ class App extends React.Component {
 
     switch (e.type) {
       case "price_change":
-        newList = this.state.filteredList.filter(
+        newList = this.state.homes.filter(
           home => home.price >= e.detail.low && home.price <= e.detail.high
         );
         break;
       case "beds_change":
-        newList = this.state.filteredList.filter(
-          home => home.beds >= e.detail.beds
-        );
+        newList = this.state.homes.filter(home => home.beds >= e.detail.beds);
         break;
       case "options":
-        newList = this.state.filteredList.filter(home =>
+        newList = this.state.homes.filter(home =>
           e.detail.options.includes(home.homeType)
         );
         break;
       default:
-        newList = this.state.filteredList;
+        newList = this.state.homes;
     }
 
     this.setState({
@@ -142,7 +143,7 @@ class App extends React.Component {
     let page = e.target.textContent;
     if (
       page === "Next" &&
-      this.state.currentPage <= Math.floor(this.state.homes.length / 25)
+      this.state.currentPage <= Math.floor(this.state.filteredList.length / 25)
     ) {
       page = this.state.currentPage + 1;
     } else if (page === "Next") {
@@ -168,7 +169,7 @@ class App extends React.Component {
         break;
       }
       display.push(
-        <Home details={filteredList[i]} select={this.houseSelect} />
+        <Home details={filteredList[i]} select={this.houseSelect} key={i} />
       );
     }
 
@@ -183,13 +184,17 @@ class App extends React.Component {
           : [style["results-page-number"], `results-page-${i + 1}`];
 
       pages.push(
-        <div className={classes.join(" ")} onClick={this.pageSelect}>
+        <div className={classes.join(" ")} onClick={this.pageSelect} key={i}>
           {i + 1}
         </div>
       );
     }
     pages.push(
-      <div className={style["results-page-next"]} onClick={this.pageSelect}>
+      <div
+        className={style["results-page-next"]}
+        onClick={this.pageSelect}
+        key="Next"
+      >
         Next
       </div>
     );
@@ -200,24 +205,28 @@ class App extends React.Component {
         filterName="Homes for you"
         selected={this.state.activeFilter === "Homes for you"}
         clicked={this.sortHomes}
+        key={1}
       />,
       <Filter
         filterClass="newest"
         filterName="Newest"
         selected={this.state.activeFilter === "Newest"}
         clicked={this.sortHomes}
+        key={2}
       />,
       <Filter
         filterClass="third-filter"
         filterName={this.state.thirdFilter}
         selected={this.state.activeFilter === this.state.thirdFilter}
         clicked={this.sortHomes}
+        key={3}
       />,
       <Filter
         filterClass="more"
         filterName="More"
         selected={this.state.activeFilter === "More"}
         clicked={this.moreFiltersDD}
+        key={4}
       />
     ];
 
@@ -238,7 +247,7 @@ class App extends React.Component {
       }
 
       bottomFilters.push(
-        <div className={style["results-bottom-filters"]}>
+        <div className={style["results-bottom-filters"]} key={i}>
           <img
             className={style["filter-images"]}
             src={`https://s3-us-west-1.amazonaws.com/zallosimilarhomes/0${25 *
@@ -269,6 +278,7 @@ class App extends React.Component {
             options={this.state.filterOptions}
             displayedFilter={this.state.thirdFilter}
             click={this.sortHomes}
+            key={1}
           />
         </div>
         <div className={style["results-homes"]}>{display}</div>
