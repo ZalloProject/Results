@@ -44,9 +44,12 @@ class App extends React.Component {
     window.addEventListener("price_change", e => this.filteredHomes(e));
     window.addEventListener("beds_change", e => this.filteredHomes(e));
     window.addEventListener("options", e => this.filteredHomes(e));
-    window.addEventListener("houses", e =>
-      this.setState({ homes: e.detail.houses })
-    );
+    window.addEventListener("houses", e => {
+      this.setState(
+        { filteredList: e.detail.houses },
+        this.sortHomes({ target: { detail: this.state.activeFilter } })
+      );
+    });
   }
 
   filteredHomes(e) {
