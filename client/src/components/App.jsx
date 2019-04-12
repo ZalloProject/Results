@@ -111,11 +111,21 @@ class App extends React.Component {
       case "Largest Homes":
         sorted = this.state.filteredList.sort((a, b) => b.size - a.size);
         break;
-      case "Homes for you":
       case "Largest Lots":
       case "Lot Size":
+        sorted = this.state.filteredList.sort((a, b) => b.lotSize - a.lotSize);
+        break;
       case "Year Built":
+        sorted = this.state.filteredList.sort(
+          (a, b) => b.yearBuilt - a.yearBuilt
+        );
+        break;
       case "Popular Homes":
+        sorted = this.state.filteredList.sort((a, b) => b.saves - a.saves);
+        break;
+      case "Homes for you":
+        sorted = this.state.filteredList.sort((a, b) => b.saved - a.saved);
+        break;
       default:
         sorted = this.state.filteredList;
     }
@@ -150,7 +160,7 @@ class App extends React.Component {
     });
 
     let filterIndex;
-    this.state.fil.forEach((home, i) => {
+    this.state.filteredList.forEach((home, i) => {
       if (home._id === id) {
         filterIndex = i;
       }

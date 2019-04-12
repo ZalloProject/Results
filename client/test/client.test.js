@@ -19,7 +19,12 @@ const home1 = {
   listingType: "Sale",
   homeType: "houses",
   createdAt: "2019-03-27T02:59:14.416+00:00",
-  pictureURL: "https://s3-us-west-1.amazonaws.com/zallosimilarhomes/099.jpg"
+  pictureURL: "https://s3-us-west-1.amazonaws.com/zallosimilarhomes/099.jpg",
+  _id: 1,
+  lotSize: 7620,
+  yearBuilt: 1990,
+  saves: 58,
+  saved: false
 };
 
 const home2 = {
@@ -34,7 +39,12 @@ const home2 = {
   listingType: "Sale",
   homeType: "houses",
   createdAt: "2019-03-28T02:59:14.416+00:00",
-  pictureURL: "https://s3-us-west-1.amazonaws.com/zallosimilarhomes/100.jpg"
+  pictureURL: "https://s3-us-west-1.amazonaws.com/zallosimilarhomes/100.jpg",
+  _id: 2,
+  lotSize: 3750,
+  yearBuilt: 1983,
+  saves: 432,
+  saved: true
 };
 
 const home3 = {
@@ -49,10 +59,19 @@ const home3 = {
   listingType: "Sale",
   homeType: "condos",
   createdAt: "2019-02-24T02:59:14.416+00:00",
-  pictureURL: "https://s3-us-west-1.amazonaws.com/zallosimilarhomes/050.jpg"
+  pictureURL: "https://s3-us-west-1.amazonaws.com/zallosimilarhomes/050.jpg",
+  _id: 3,
+  lotSize: 5438,
+  yearBuilt: 2013,
+  saves: 34,
+  saved: false
 };
 
 const options = ["Cheapest", "Price (High to Low)", "Bedrooms"];
+
+const mockSave = () => {
+  return true;
+};
 
 describe("Main Results Component", () => {
   it('should be selectable by class "results-container"', () => {
@@ -122,10 +141,19 @@ describe("Main Results Component", () => {
   });
 
   describe("sortHomes function", () => {
+    it("should change state to order homes by saved homes first", () => {
+      const wrapper = shallow(<App homes={[home1, home2, home3]} />);
+      wrapper
+        .instance()
+        .sortHomes({ target: { textContent: "Homes for you" } });
+      expect(wrapper.state("filteredList")[0].price).toBe(280000);
+    });
     it("should change state to order homes by cheapest to most expensive", () => {
       const wrapper = shallow(<App homes={[home1, home2, home3]} />);
       wrapper.instance().sortHomes({ target: { textContent: "Cheapest" } });
       expect(wrapper.state("filteredList")[0].price).toBe(275000);
+      expect(wrapper.state("filteredList")[1].price).toBe(280000);
+      expect(wrapper.state("filteredList")[2].price).toBe(320000);
     });
     it("should change state to order homes from most to least expensive", () => {
       const wrapper = shallow(<App homes={[home1, home2, home3]} />);
@@ -133,26 +161,63 @@ describe("Main Results Component", () => {
         .instance()
         .sortHomes({ target: { textContent: "Price (High to Low)" } });
       expect(wrapper.state("filteredList")[0].price).toBe(320000);
+      expect(wrapper.state("filteredList")[1].price).toBe(280000);
+      expect(wrapper.state("filteredList")[2].price).toBe(275000);
     });
     it("should change state to order by newest", () => {
       const wrapper = shallow(<App homes={[home1, home2, home3]} />);
       wrapper.instance().sortHomes({ target: { textContent: "Newest" } });
       expect(wrapper.state("filteredList")[0].price).toBe(280000);
+      expect(wrapper.state("filteredList")[1].price).toBe(320000);
+      expect(wrapper.state("filteredList")[2].price).toBe(275000);
     });
     it("should change state to order by most bedrooms", () => {
       const wrapper = shallow(<App homes={[home1, home2, home3]} />);
       wrapper.instance().sortHomes({ target: { textContent: "Bedrooms" } });
       expect(wrapper.state("filteredList")[0].price).toBe(320000);
+      expect(wrapper.state("filteredList")[1].price).toBe(280000);
+      expect(wrapper.state("filteredList")[2].price).toBe(275000);
     });
     it("should change state to order by most bathrooms", () => {
       const wrapper = shallow(<App homes={[home1, home2, home3]} />);
       wrapper.instance().sortHomes({ target: { textContent: "Bathrooms" } });
       expect(wrapper.state("filteredList")[0].price).toBe(280000);
+      expect(wrapper.state("filteredList")[1].price).toBe(320000);
+      expect(wrapper.state("filteredList")[2].price).toBe(275000);
     });
     it("should change state to order by square feet", () => {
       const wrapper = shallow(<App homes={[home1, home2, home3]} />);
       wrapper.instance().sortHomes({ target: { textContent: "Square Feet" } });
       expect(wrapper.state("filteredList")[0].price).toBe(320000);
+      expect(wrapper.state("filteredList")[1].price).toBe(280000);
+      expect(wrapper.state("filteredList")[2].price).toBe(275000);
+    });
+    it("should change state to order by lot size", () => {
+      const wrapper = shallow(<App homes={[home1, home2, home3]} />);
+      wrapper.instance().sortHomes({ target: { textContent: "Lot Size" } });
+      expect(wrapper.state("filteredList")[0].price).toBe(320000);
+      expect(wrapper.state("filteredList")[1].price).toBe(275000);
+      expect(wrapper.state("filteredList")[2].price).toBe(280000);
+      wrapper.instance().sortHomes({ target: { textContent: "Largest Lots" } });
+      expect(wrapper.state("filteredList")[0].price).toBe(320000);
+      expect(wrapper.state("filteredList")[1].price).toBe(275000);
+      expect(wrapper.state("filteredList")[2].price).toBe(280000);
+    });
+    it("should change state to order by year built, newest first", () => {
+      const wrapper = shallow(<App homes={[home1, home2, home3]} />);
+      wrapper.instance().sortHomes({ target: { textContent: "Year Built" } });
+      expect(wrapper.state("filteredList")[0].price).toBe(275000);
+      expect(wrapper.state("filteredList")[1].price).toBe(320000);
+      expect(wrapper.state("filteredList")[2].price).toBe(280000);
+    });
+    it("should change state to order by popularity", () => {
+      const wrapper = shallow(<App homes={[home1, home2, home3]} />);
+      wrapper
+        .instance()
+        .sortHomes({ target: { textContent: "Popular Homes" } });
+      expect(wrapper.state("filteredList")[0].price).toBe(280000);
+      expect(wrapper.state("filteredList")[1].price).toBe(320000);
+      expect(wrapper.state("filteredList")[2].price).toBe(275000);
     });
     it("should not change state when invalid filter is passed in", () => {
       const wrapper = shallow(<App homes={[home1, home2, home3]} />);
@@ -224,15 +289,36 @@ describe("Main Results Component", () => {
 
 describe("Home Component", () => {
   it('should be selectable by class "results-home-slide"', () => {
-    expect(shallow(<Home details={home1} />).is(".results-home-slide")).toBe(
-      true
-    );
+    expect(
+      shallow(<Home details={home1} save={mockSave} />).is(
+        ".results-home-slide"
+      )
+    ).toBe(true);
   });
 
   it("should mount in a full DOM", () => {
     expect(
-      mount(<Home details={home1} />).find(".results-home-slide").length
+      mount(<Home details={home1} save={mockSave} />).find(
+        ".results-home-slide"
+      ).length
     ).toBe(1);
+  });
+
+  it("should render the proper heart image based on the saved property of the home", () => {
+    expect(
+      mount(<Home details={home2} save={mockSave} />)
+        .find(".results-home-heart")
+        .prop("src")
+    ).toBe(
+      "https://s3-us-west-1.amazonaws.com/zallosimilarhomes/ZalloHeartSaved.png"
+    );
+    expect(
+      mount(<Home details={home3} save={mockSave} />)
+        .find(".results-home-heart")
+        .prop("src")
+    ).toBe(
+      "https://s3-us-west-1.amazonaws.com/zallosimilarhomes/ZalloHeart.png"
+    );
   });
 });
 
