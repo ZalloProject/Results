@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-expressions */
 /* eslint-disable import/extensions */
 import React from "react";
 import ReactDOM from "react-dom";
@@ -14,7 +15,16 @@ fetch(
 )
   .then(response => response.json())
   .then(myJson => {
-    myJson.forEach(home => Object.assign(home, { saved: false }));
-    ReactDOM.render(<App homes={myJson} />, document.getElementById("results"));
+    const savedHomes =
+      JSON.parse(window.localStorage.getItem("SavedHomes")) || [];
+    myJson.forEach(home => {
+      savedHomes.includes(home._id)
+        ? Object.assign(home, { saved: true })
+        : Object.assign(home, { saved: false });
+    });
+    ReactDOM.render(
+      <App homes={myJson} saved={savedHomes} />,
+      document.getElementById("results")
+    );
   })
   .catch(err => console.log(err));

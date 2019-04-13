@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-expressions */
 /* eslint-disable class-methods-use-this */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 /* eslint-disable jsx-a11y/no-static-element-interactions */
@@ -17,11 +18,20 @@ class App extends React.Component {
     this.state = {
       homes: this.props.homes,
       filteredList: this.props.homes,
+      savedList: this.props.saved || [],
       currentPage: 1,
-      activeFilter: "Homes for you",
-      thirdFilter: "Cheapest",
-      moreFilterActive: false,
-      filterOptions: [
+      activeSort: "Homes for you",
+      activeFilters: {
+        price: {
+          high: 950000,
+          low: 125000
+        },
+        beds: 1,
+        homeTypes: ["houses", "apts", "condos", "townHomes"]
+      },
+      thirdSort: "Cheapest",
+      moreSortActive: false,
+      sortOptions: [
         "Cheapest",
         "Price (High to Low)",
         "Bedrooms",
@@ -44,49 +54,89 @@ class App extends React.Component {
     window.addEventListener("price_change", e => this.filteredHomes(e));
     window.addEventListener("beds_change", e => this.filteredHomes(e));
     window.addEventListener("options", e => this.filteredHomes(e));
-    window.addEventListener("houses", e => {
-      this.setState(
-        { filteredList: e.detail.houses },
-        this.sortHomes({ target: { detail: this.state.activeFilter } })
-      );
-    });
+    // window.addEventListener("houses", e => {
+    //   this.setState({ homes: e.detail.houses }, () => {
+    //     this.filteredHomes({ target: { detail: this.state.activeFilters } });
+    //     this.sortHomes({ target: { detail: this.state.activeSort } });
+    //   });
+    // });
+    window.addEventListener("bounds", e => this.getHomesByBounds(e));
   }
 
-  filteredHomes(e) {
-    let newList = [];
+  getHomesByBounds(e) {
+    const { north, south, east, west } = e.detail.bounds;
+    fetch(
+      `http://zallosimilarhomesservice-env.3cy6gkds47.us-east-2.elasticbeanstalk.com/homesByCoord/${south}&${north}&${east}&${west}`
+    )
+      .then(response => response.json())
+      .then(myJson => {
+        const savedHomes = this.state.savedList;
+        myJson.forEach(home => {
+          savedHomes.includes(home._id)
+            ? Object.assign(home, { saved: true })
+            : Object.assign(home, { saved: false });
+        });
+        this.setState(
+          {
+            homes: myJson
+          },
+          () => {
+            this.filteredHomes(
+              {
+                detail: this.state.activeFilters,
+                type: "none"
+              },
+              this.sortHomes({ target: { textContent: this.state.activeSort } })
+            );
+          }
+        );
+      })
+      .catch(err => console.log(err));
+  }
+
+  filteredHomes(e, cb = null) {
+    const filters = this.state.activeFilters;
 
     switch (e.type) {
       case "price_change":
-        newList = this.state.homes.filter(
-          home => home.price >= e.detail.low && home.price <= e.detail.high
-        );
+        filters.price.high = e.detail.high;
+        filters.price.low = e.detail.low;
         break;
       case "beds_change":
-        newList = this.state.homes.filter(home => home.beds >= e.detail.beds);
+        filters.beds = e.detail.beds;
         break;
       case "options":
-        newList = this.state.homes.filter(home =>
-          e.detail.options.includes(home.homeType)
-        );
+        filters.homeTypes = e.detail.options;
         break;
       default:
-        newList = this.state.homes;
     }
 
-    this.setState({
-      filteredList: newList,
-      currentPage: 1,
-      activeFilter: "Homes for you",
-      moreFilterActive: false
-    });
+    const newList = this.state.homes.filter(
+      home =>
+        home.price >= filters.price.low &&
+        home.price <= filters.price.high &&
+        home.beds >= filters.beds &&
+        filters.homeTypes.includes(home.homeType)
+    );
+
+    this.setState(
+      {
+        filteredList: newList,
+        currentPage: 1,
+        activeSort: "Homes for you",
+        activeFilters: filters,
+        moreSortActive: false
+      },
+      cb
+    );
   }
 
   sortHomes(e) {
     let sorted = [];
+    let newSort = this.state.thirdSort;
 
-    let newFilter = this.state.thirdFilter;
-    if (this.state.filterOptions.includes(e.target.textContent)) {
-      newFilter = e.target.textContent;
+    if (this.state.sortOptions.includes(e.target.textContent)) {
+      newSort = e.target.textContent;
     }
 
     switch (e.target.textContent) {
@@ -134,23 +184,23 @@ class App extends React.Component {
     }
     this.setState({
       filteredList: sorted,
-      activeFilter: e.target.textContent,
-      moreFilterActive: false,
-      thirdFilter: newFilter,
+      activeSort: e.target.textContent,
+      moreSortActive: false,
+      thirdSort: newSort,
       currentPage: 1
     });
   }
 
   moreFiltersDD() {
-    const currentState = this.state.moreFilterActive;
+    const currentState = this.state.moreSortActive;
     this.setState({
-      moreFilterActive: !currentState
+      moreSortActive: !currentState
     });
   }
 
   houseSelect() {
     window.dispatchEvent(
-      new CustomEvent(("house_view", { detail: { houseView: true } }))
+      new CustomEvent("house_view", { detail: { houseView: true } })
     );
   }
 
@@ -169,6 +219,15 @@ class App extends React.Component {
       }
     });
 
+    let newList = this.state.savedList;
+
+    if (!this.state.filteredList[filterIndex].saved) {
+      newList.push(id);
+    } else {
+      newList = newList.filter(savedId => savedId !== id);
+    }
+    window.localStorage.setItem("SavedHomes", JSON.stringify(newList));
+
     this.setState({
       homes: update(this.state.homes, {
         [index]: { saved: { $set: !this.state.homes[index].saved } }
@@ -177,7 +236,8 @@ class App extends React.Component {
         [filterIndex]: {
           saved: { $set: !this.state.filteredList[filterIndex].saved }
         }
-      })
+      }),
+      savedList: newList
     });
   }
 
@@ -250,28 +310,28 @@ class App extends React.Component {
       <Filter
         filterClass="for-you"
         filterName="Homes for you"
-        selected={this.state.activeFilter === "Homes for you"}
+        selected={this.state.activeSort === "Homes for you"}
         clicked={this.sortHomes}
         key={1}
       />,
       <Filter
         filterClass="newest"
         filterName="Newest"
-        selected={this.state.activeFilter === "Newest"}
+        selected={this.state.activeSort === "Newest"}
         clicked={this.sortHomes}
         key={2}
       />,
       <Filter
         filterClass="third-filter"
-        filterName={this.state.thirdFilter}
-        selected={this.state.activeFilter === this.state.thirdFilter}
+        filterName={this.state.thirdSort}
+        selected={this.state.activeSort === this.state.thirdSort}
         clicked={this.sortHomes}
         key={3}
       />,
       <Filter
         filterClass="more"
         filterName="More"
-        selected={this.state.activeFilter === "More"}
+        selected={this.state.activeSort === "More"}
         clicked={this.moreFiltersDD}
         key={4}
       />
@@ -321,9 +381,9 @@ class App extends React.Component {
         <div className={style["results-buttons-row"]}>
           <ul className={style["results-buttons"]}>{filters}</ul>
           <MoreDropdown
-            active={this.state.moreFilterActive}
-            options={this.state.filterOptions}
-            displayedFilter={this.state.thirdFilter}
+            active={this.state.moreSortActive}
+            options={this.state.sortOptions}
+            displayedFilter={this.state.thirdSort}
             click={this.sortHomes}
             key={1}
           />

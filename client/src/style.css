@@ -1,5 +1,6 @@
 .results-container {
   overflow-y: scroll;
+  max-height: -webkit-fill-available;
 }
 
 .results-title-container {

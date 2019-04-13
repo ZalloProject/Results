@@ -232,7 +232,7 @@ describe("Main Results Component", () => {
     it("should open the dropdown when called once", () => {
       const wrapper = shallow(<App homes={[home1, home2, home3]} />);
       wrapper.instance().moreFiltersDD();
-      expect(wrapper.state("moreFilterActive")).toBe(true);
+      expect(wrapper.state("moreSortActive")).toBe(true);
     });
   });
 
