@@ -44,6 +44,7 @@
   padding-left: 1rem;
   padding-right: 1rem;
   font-size: 18px;
+  position: relative;
 }
 
 .results-buttons {
@@ -231,8 +232,10 @@ li.active {
   text-shadow: 0 0 3px rgba(0, 0, 0, 0.5);
   align-items: center;
   justify-content: center;
+  width: 100%;
   width: -webkit-fill-available;
-  height: -webkit-fill-available;
+  width: -moz-available;
+  height: 65px;
   background-color: rgba(68, 68, 68, 0.35);
 }
 

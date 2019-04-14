@@ -22,6 +22,11 @@ fetch(
         ? Object.assign(home, { saved: true })
         : Object.assign(home, { saved: false });
     });
+    window.dispatchEvent(
+      new CustomEvent("home_saved", {
+        detail: { homesSaved: savedHomes.length }
+      })
+    );
     ReactDOM.render(
       <App homes={myJson} saved={savedHomes} />,
       document.getElementById("results")

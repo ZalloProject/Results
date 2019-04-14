@@ -227,6 +227,9 @@ class App extends React.Component {
       newList = newList.filter(savedId => savedId !== id);
     }
     window.localStorage.setItem("SavedHomes", JSON.stringify(newList));
+    window.dispatchEvent(
+      new CustomEvent("home_saved", { detail: { homesSaved: newList.length } })
+    );
 
     this.setState({
       homes: update(this.state.homes, {
